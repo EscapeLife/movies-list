@@ -101,12 +101,12 @@ $ pip install python-dotenv
 
 除此之外，它还有一个重要的作用：作为代表某个路由的**端点**(`endpoint`)，同时用来生成 `URL`。对于程序内的 `URL`，为了避免手写，`Flask` 提供了一个 `url_for` 函数来生成 `URL`，它接受的第一个参数就是端点值，默认为视图函数的名称。
 
-| 类型转换器 | 作用                 |
-| ---------- | -------------------- |
-| 缺省       | 字符型；但不能有斜杠 |
-| `path:`    | 字符型；可有斜杠     |
-| `int:`     | 整型                 |
-| `float:`   | 浮点型               |
+| 类型转换器   | 作用                 |
+| ------------ | -------------------- |
+| **缺省**     | 字符型；但不能有斜杠 |
+| **`path:`**  | 字符型；可有斜杠     |
+| **`int:`**   | 整型                 |
+| **`float:`** | 浮点型               |
 
 ```python
 from flask import Flask
@@ -143,7 +143,7 @@ def test_url_for():
 
 > **介绍 Jinja2 模板的简单使用！**
 
-按照默认的设置，`Flask` 会从程序实例(`app.py`)所在模块同级目录的 `templates` 文件夹中寻找模板。
+`Jinja2` 的表达式中支持字符串、数值、列表、元祖、字典、布尔值，同时也支持算数运算、比较运算、逻辑运算，还支持过滤器、测试器、函数调用、字符串连接符(`~`)，等等。
 
 - **`{# ... #}`** => 用来书写注释
 - **`{{ ... }}`** => 用来标记变量 => 在渲染的时候传递进去
@@ -158,15 +158,98 @@ def test_url_for():
 {% endif %}
 ```
 
+- **控制语句**
+
+```jinja2
+# if
+{% if name and name == 'admin'  %}
+  <h1>This is admin console</h1>
+{% elif name %}
+  <h1>Welcome {{ name }}!</h1>
+{% else %}
+  <h1>Please login</h1>
+{% endif %}
+```
+
+```jinja2
+# for - 有空格
+{% for digit in digits %}
+  {{ digit }}
+{% endfor %}
+
+# for - 无空格
+{% for digit in digits -%}
+  {{ digit }}
+{%- endfor %}
+```
+
+- **内置变量**
+
+| 变量                 | 内容                                                      |
+| -------------------- | --------------------------------------------------------- |
+| **`loop.index`**     | 循环迭代计数；从 `1` 开始）                               |
+| **`loop.index0`**    | 循环迭代计数；从 `0` 开始）                               |
+| **`loop.revindex`**  | 循环迭代倒序计数；从 `len` 开始，到 `1` 结束）            |
+| **`loop.revindex0`** | 循环迭代倒序计数；从 `len－1` 开始，到 `0` 结束）         |
+| **`loop.first`**     | 是否为循环的第一个元素                                    |
+| **`loop.last`**      | 是否为循环的最后一个元素                                  |
+| **`loop.length`**    | 循环序列中元素的个数                                      |
+| **`loop.cycle`**     | 在给定的序列中轮循，如上例在 `odd` 和 `even` 两个值间轮循 |
+| **`loop.depth`**     | 当前循环在递归中的层级；从 `1` 开始）                     |
+| **`loop.depth0`**    | 当前循环在递归中的层级；从 `0` 开始）                     |
+
+- **常用语句**
+
+```jinja2
+# 忽略模板语法
+{% raw %}
+    <ul>
+    {% for item in items %}
+        <li>{{ item }}</li>
+    {% endfor %}
+    </ul>
+{% endraw %}
+```
+
+```jinja2
+# 忽略自动转义
+{% autoescape false %}
+  <h1>Hello {{ name }}!</h1>
+{% endautoescape %}
+```
+
+```jinja2
+# 赋值
+{% set items = [[1,2],[3,4,5]] %}
+```
+
+```jinja2
+# with语句
+{% with foo = 1 %}
+    {% set bar = 2 %}
+    {{ foo + bar }}
+{% endwith %}
+
+# with语句 - 执行表达式
+{% with arr = ['Sunny'] %}
+  {% do arr.append('Rainy') %}
+  {{ arr }}
+{% endwith %}
+```
+
+```jinja2
+# 忽略模板语法
+```
+
 ---
 
 ### 2.2 模板渲染
 
 > **介绍模板渲染的基本方式！**
 
-使用 `render_template()` 函数可以把模板渲染出来，必须传入的参数为模板文件名（相对于 `templates` 根目录的文件路径），这里即 `index.html` 文件。为了让模板正确渲染，我们还要把模板内部使用的变量通过关键字参数传入这个函数。
+按照默认的设置，`Flask` 会从程序实例(`app.py`)所在模块同级目录的 `templates` 文件夹中寻找模板。
 
-`render_template()` 函数在调用时会识别并执行 `index.html` 里所有的 `Jinja2` 语句，返回渲染好的模板内容。在返回的页面中，变量会被替换为实际的值（包括定界符），语句及定界符则会在执行后被移除，同时注释也会一并移除。
+使用 `render_template()` 函数可以把模板渲染出来，必须传入的参数为模板文件名（相对于 `templates` 根目录的文件路径），这里即 `index.html` 文件。为了让模板正确渲染，我们还要把模板内部使用的变量通过关键字参数传入这个函数。`render_template()` 函数在调用时会识别并执行 `index.html` 里所有的 `Jinja2` 语句，返回渲染好的模板内容。在返回的页面中，变量会被替换为实际的值（包括定界符），语句及定界符则会在执行后被移除，同时注释也会一并移除。
 
 ```python
 from flask import Flask, render_template
@@ -178,44 +261,110 @@ def index():
     return render_template('index.html', name=name, movies=movies)
 ```
 
+同时，`Jinja2` 在模板渲染中，还支持多种上下文：
+
+- **请求对象 - request**
+  - `<p>{{ request.url }}</p>`
+- **会话对象 - session**
+  - `<p>User: {{ session.id }}</p>`
+- **全局对象 - g**
+  - `<p>DB: {{ g.db }}</p>`
+- **配置对象 - config**
+  - `<p>Host: {{ config.DEBUG }}</p>`
+
 ---
 
 ### 2.3 过滤器
 
 > **过滤器包括 Jinja2 库中定义的内置过滤器，当然我们也可以自定义过滤器！**
 
-- **[内置过滤器的列表](https://jinja.palletsprojects.com/en/2.10.x/templates/#list-of-builtin-filters)**
+- **[内置过滤器](https://jinja.palletsprojects.com/en/2.10.x/templates/#list-of-builtin-filters)**
 
 ![Flask入门指南 - 过滤器](/docs/images/hello-flask-jinjia2-filters.png)
 
----
+- **自定义过滤器**
 
-### 2.4 继承
+过滤器简单来讲就是一个函数，在 `Flask` 应用对象，我们可以使用 `add_template_filter` 方法来帮我们实现。方法的的第一个参数是过滤器函数，第二个参数是过滤器名称。
 
-`Flask` 的 `Jinja2` 模板支持模板继承功能，可以帮助我们省去了很多重复的代码。
+```python
+from flask import Flask
+app = Flask(__name__)
 
-- **layout.html**
+def reverse_order(lst):
+    return lst[::-1]
 
-```jinja2
-<!doctype html>
-<title>Hello Sample</title>
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-<div class="page">
-    {% block body %}
-    {% endblock %}
-</div>
+# 添加方式一(方法)
+app.add_template_filter(reverse_order, 'user_reverse_order')
 ```
 
-- **hello.html**
+```python
+from flask import Flask
+app = Flask(__name__)
+
+# 添加方式二(装饰器)
+@app.template_filter('user_reverse_order')
+def reverse_order(lst):
+    return lst[::-1]
+```
+
+`Flask` 添加过滤器的方法实际上是封装了对 `Jinja2` 环境变量的操作。在 `Flask` 应用中，不建议直接访问 `Jinja2` 的环境变量。如果离开 `Flask` 环境直接使用 `Jinja2` 的话，就可以通过 `jinja2.Environment` 来获取环境变量，并添加过滤器。
+
+```python
+app.jinja_env.filters['user_reverse_order'] = reverse_order
+```
+
+---
+
+### 2.4 块和宏
+
+> **考虑到模板代码的重用，Jinja2 提供了块(Block)和宏(Macro)的功能！**
+
+- **块** => 功能有些类似于 C 语言中的宏，原理就是代码替换
+  - 模板不支持多继承，也就是子模板中定义的块，不可能同时被两个父模板替换。
+  - 模板中不能定义多个同名的块，子模板和父模板都不行，因为这样无法知道要替换哪一个部分的内容。
+  - 可以使用 `super()` 方法继承父模板中的块里有内容，而不是替换掉
 
 ```jinja2
-{% extends "layout.html" %}
+# footer.html
+<!DOCTYPE html>
+<html lang="en">
+<body>
+  {% block body %}
+  {% endblock %}
+</body>
+<footer>
+  <small>&copy; 2021 <a href="http://movieslist.com">Hello Flask</a></small>
+</footer>
+</html>
+```
 
+```jinja2
+# index.html
+{% extends "footer.html" %}
 {% block body %}
-{% if name %}
-<h1>Hello {{ name }}!</h1>
-{% else %}
-<h1>Hello World!</h1>
-{% endif %}
+  # {{ super() }}
+  {% if name %}
+    <h1>Hello {{ name }}!</h1>
+  {% else %}
+    <h1>Hello World!</h1>
+  {% endif %}
 {% endblock %}
+```
+
+- **宏** => 功能有些类似于函数，可以传入参数。
+  - 既然是函数，就有其声明和调用两个部分。
+
+```jinja2
+# 声明一个名为input的宏函数
+{% macro input(name, type='text', value='') -%}
+    <input type="{{ type }}" name="{{ name }}" value="{{ value|e }}">
+{%- endmacro %}
+
+# 使用调用
+<p>{{ input('username', value='user') }}</p>
+<p>{{ input('password', 'password') }}</p>
+<p>{{ input('submit', 'submit', 'Submit') }}</p>
+
+# 宏的导入
+{% from 'form.html' import input %}
 ```

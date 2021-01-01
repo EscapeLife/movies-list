@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }}'s movies list</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ name }}'s movies list</title>
 </head>
 <body>
-    <h2>{{ name }}'s movies list</h2>
-    <p>{{ movies|length }} Titles</p>
-    <ul>
-        {% for movie in movies %}
-        <li>{{ movie.title }} - {{ movie.year }}</li>
-        {% endfor %}
-    </ul>
+  <h2>{{ name }}'s movies list</h2>
+  <p>{{ movies|length }} Titles</p>
+  <ul>
+    {% for movie in movies %}
+      <li>{{ movie.title }} - {{ movie.year }}</li>
+    {% endfor %}
+  </ul>
 </body>
 <footer>
-    <small>&copy; 2021 <a href="http://movieslist.com">Hello Flask</a></small>
+  <small>&copy; 2021 <a href="http://movieslist.com">Hello Flask</a></small>
 </footer>
 </html>
