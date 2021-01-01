@@ -101,19 +101,30 @@ $ pip install python-dotenv
 
 除此之外，它还有一个重要的作用：作为代表某个路由的**端点**(`endpoint`)，同时用来生成 `URL`。对于程序内的 `URL`，为了避免手写，`Flask` 提供了一个 `url_for` 函数来生成 `URL`，它接受的第一个参数就是端点值，默认为视图函数的名称。
 
+| 类型转换器 | 作用                 |
+| ---------- | -------------------- |
+| 缺省       | 字符型；但不能有斜杠 |
+| `path:`    | 字符型；可有斜杠     |
+| `int:`     | 整型                 |
+| `float:`   | 浮点型               |
+
 ```python
 from flask import Flask
 from flask.helpers import url_for
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def hello():
     return 'Welcome to watch list!'
 
 @app.route('/user/<name>')
 def user_page(name):
     return f'User page: {name}.'
+
+@app.route('/user/<int:user_id>')
+def get_user(user_id):
+    return f'User id: {user_id}'
 
 @app.route('/test')
 def test_url_for():
@@ -122,4 +133,89 @@ def test_url_for():
     print(url_for('user_page', name='peter'))  # /user/peter
     print(url_for('test_url_for', num=2))      # /test?num=2
     return "Test page."
+```
+
+---
+
+## 2. 模板使用
+
+### 2.1 基本语法
+
+> **介绍 Jinja2 模板的简单使用！**
+
+按照默认的设置，`Flask` 会从程序实例(`app.py`)所在模块同级目录的 `templates` 文件夹中寻找模板。
+
+- **`{# ... #}`** => 用来书写注释
+- **`{{ ... }}`** => 用来标记变量 => 在渲染的时候传递进去
+- **`{% ... %}`** => 用来标记语句 => `if` 语句或 `for` 语句
+
+```jinja2
+<h1>{{ username }}的个人主页</h1>
+{% if bio %}
+<p>{{ bio }}</p>
+{% else %}
+<p>自我介绍为空。</p>
+{% endif %}
+```
+
+---
+
+### 2.2 模板渲染
+
+> **介绍模板渲染的基本方式！**
+
+使用 `render_template()` 函数可以把模板渲染出来，必须传入的参数为模板文件名（相对于 `templates` 根目录的文件路径），这里即 `index.html` 文件。为了让模板正确渲染，我们还要把模板内部使用的变量通过关键字参数传入这个函数。
+
+`render_template()` 函数在调用时会识别并执行 `index.html` 里所有的 `Jinja2` 语句，返回渲染好的模板内容。在返回的页面中，变量会被替换为实际的值（包括定界符），语句及定界符则会在执行后被移除，同时注释也会一并移除。
+
+```python
+from flask import Flask, render_template
+from data import movies, name
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html', name=name, movies=movies)
+```
+
+---
+
+### 2.3 过滤器
+
+> **过滤器包括 Jinja2 库中定义的内置过滤器，当然我们也可以自定义过滤器！**
+
+- **[内置过滤器的列表](https://jinja.palletsprojects.com/en/2.10.x/templates/#list-of-builtin-filters)**
+
+![Flask入门指南 - 过滤器](/docs/images/hello-flask-jinjia2-filters.png)
+
+---
+
+### 2.4 继承
+
+`Flask` 的 `Jinja2` 模板支持模板继承功能，可以帮助我们省去了很多重复的代码。
+
+- **layout.html**
+
+```jinja2
+<!doctype html>
+<title>Hello Sample</title>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<div class="page">
+    {% block body %}
+    {% endblock %}
+</div>
+```
+
+- **hello.html**
+
+```jinja2
+{% extends "layout.html" %}
+
+{% block body %}
+{% if name %}
+<h1>Hello {{ name }}!</h1>
+{% else %}
+<h1>Hello World!</h1>
+{% endif %}
+{% endblock %}
 ```
