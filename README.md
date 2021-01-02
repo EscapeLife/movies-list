@@ -152,9 +152,9 @@ def test_url_for():
 ```jinja2
 <h1>{{ username }}的个人主页</h1>
 {% if bio %}
-<p>{{ bio }}</p>
+  <p>{{ bio }}</p>
 {% else %}
-<p>自我介绍为空。</p>
+  <p>自我介绍为空。</p>
 {% endif %}
 ```
 
@@ -203,11 +203,11 @@ def test_url_for():
 ```jinja2
 # 忽略模板语法
 {% raw %}
-    <ul>
-    {% for item in items %}
-        <li>{{ item }}</li>
-    {% endfor %}
-    </ul>
+  <ul>
+  {% for item in items %}
+    <li>{{ item }}</li>
+  {% endfor %}
+  </ul>
 {% endraw %}
 ```
 
@@ -224,10 +224,10 @@ def test_url_for():
 ```
 
 ```jinja2
-# with语句
+# with语句 - 需要安装扩展
 {% with foo = 1 %}
-    {% set bar = 2 %}
-    {{ foo + bar }}
+  {% set bar = 2 %}
+  {{ foo + bar }}
 {% endwith %}
 
 # with语句 - 执行表达式
@@ -315,7 +315,7 @@ app.jinja_env.filters['user_reverse_order'] = reverse_order
 
 > **考虑到模板代码的重用，Jinja2 提供了块(Block)和宏(Macro)的功能！**
 
-- **块** => 功能有些类似于 C 语言中的宏，原理就是代码替换
+- **块** => 功能有些类似于 `C` 语言中的宏，原理就是代码替换
   - 模板不支持多继承，也就是子模板中定义的块，不可能同时被两个父模板替换。
   - 模板中不能定义多个同名的块，子模板和父模板都不行，因为这样无法知道要替换哪一个部分的内容。
   - 可以使用 `super()` 方法继承父模板中的块里有内容，而不是替换掉
@@ -364,3 +364,58 @@ app.jinja_env.filters['user_reverse_order'] = reverse_order
 # 宏的导入
 {% from 'form.html' import input %}
 ```
+
+---
+
+## 3. 静态文件
+
+### 3.1 资源引入
+
+> **资源文件的路径还是依赖 app 初始化的传参来确定的！**
+
+静态文件和模板概念恰恰是相反的，其指的是内容不需要动态生成的文件。比如图片、`CSS` 文件和 `JavaScript` 脚本等。在 `Flask` 中，我们需要创建一个 `static` 文件夹来保存静态文件，它应该和程序模块、`templates` 文件夹在同一目录层级。
+
+引入这些静态文件需要给出资源所在的 `URL` 地址，这里我们可以使用 `url_for()` 这个函数来完成。对于静态文件而言，需要传入的端点值是 `static`，同时使用 `filename` 参数来传入相对于 `static` 文件夹的文件路径。
+
+在 `Python` 脚本里，`url_for()` 函数需要从 `flask` 包中导入，而在模板中则可以直接使用。这是因为 `Flask` 把一些常用的函数和对象添加到了模板上下文里，所以不再需要我们再次导入了。
+
+```html
+<!-- 引入图片 -->
+<img src="{{ url_for('static', filename='foo.jpg') }}" />
+
+<!-- 添加icon -->
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" />
+```
+
+---
+
+### 3.2 样式引入
+
+> **为了方便起见，建议直接使用已经封装好的 CSS 样式工具，比如 BS5 或者 Pure 等！**
+
+如果我们引入自己定义的 `CSS` 样式的话，可以通过 `<link>` 标签在 `HTML` 文件中引入对应资源。
+
+```html
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css" />
+```
+
+当然，我们这里也可以选择其他的 `CSS` 样式资源，亦或者是远程的资源文件。
+
+```html
+<!-- CSS -->
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css"
+  rel="stylesheet"
+  integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1"
+  crossorigin="anonymous"
+/>
+
+<!-- JS -->
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW"
+  crossorigin="anonymous"
+></script>
+```
+
+---
